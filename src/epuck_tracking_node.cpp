@@ -94,7 +94,7 @@ class EPuckTracking
 			nh.param<bool>("draw_markers", draw_markers, false);
 			nh.param<bool>("draw_markers_cube", draw_markers_cube, false);
 			nh.param<bool>("draw_markers_axis", draw_markers_axis, false);
-
+			git test
 			the_board_config.readFromFile(board_config.c_str());*/
 
 			ROS_INFO("Epuck_tracking node started with marker size of %f m and board configuration: %s",
