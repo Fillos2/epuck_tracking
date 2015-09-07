@@ -72,6 +72,41 @@ tf::Transform ar_sys::getTf(const cv::Mat &Rvec, const cv::Mat &Tvec)
 		rot.at<float>(1,0), rot.at<float>(1,1), rot.at<float>(1,2),
 		rot.at<float>(2,0), rot.at<float>(2,1), rot.at<float>(2,2));
 
+	tf::Vector3 tf_orig(Tvec.at<float>(0,0), -Tvec.at<float>(1,0), Tvec.at<float>(2,0));
+
+	return tf::Transform(tf_rot, tf_orig);
+}
+tf::Transform ar_sys::getTfMarkers(const cv::Mat &Rvec, const cv::Mat &Tvec)
+{
+	cv::Mat rot(3, 3, CV_32FC1);
+	cv::Rodrigues(Rvec, rot);
+
+	cv::Mat rotate_to_sys(3, 3, CV_32FC1);
+	/**
+	/* Fixed the rotation to meet the ROS system
+	/* Doing a basic rotation around X with theta=PI
+	/* By Sahloul
+	/* See http://en.wikipedia.org/wiki/Rotation_matrix for details
+	*/
+
+	//	1	0	0
+	//	0	-1	0
+	//	0	0	-1
+	rotate_to_sys.at<float>(0,0) = 1.0;
+	rotate_to_sys.at<float>(0,1) = 0.0;
+	rotate_to_sys.at<float>(0,2) = 0.0;
+	rotate_to_sys.at<float>(1,0) = 0.0;
+	rotate_to_sys.at<float>(1,1) = -1.0;
+	rotate_to_sys.at<float>(1,2) = 0.0;
+	rotate_to_sys.at<float>(2,0) = 0.0;
+	rotate_to_sys.at<float>(2,1) = 0.0;
+	rotate_to_sys.at<float>(2,2) = -1.0;
+	rot = rot*rotate_to_sys.t();
+
+	tf::Matrix3x3 tf_rot(rot.at<float>(0,0), rot.at<float>(0,1), rot.at<float>(0,2),
+		rot.at<float>(1,0), rot.at<float>(1,1), rot.at<float>(1,2),
+		rot.at<float>(2,0), rot.at<float>(2,1), rot.at<float>(2,2));
+
 	tf::Vector3 tf_orig(Tvec.at<float>(0,0), Tvec.at<float>(1,0), Tvec.at<float>(2,0));
 
 	return tf::Transform(tf_rot, tf_orig);

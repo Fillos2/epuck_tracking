@@ -15,9 +15,11 @@
 #include "epuck_tracking/utils.h"
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
-
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 using namespace aruco;
-
+using namespace cv;
 class EPuckTracking
 {
 	private:
@@ -39,11 +41,12 @@ class EPuckTracking
 		ros::Publisher pose_pub;
 		ros::Publisher transform_pub; 
 		ros::Publisher position_pub;
+		ros::Subscriber vect;
 		std::string board_frame;
 		Dictionary D;
 		double marker_size;
 		std::string board_config;
-
+		float speed[8][2];
 		ros::NodeHandle nh;
 		image_transport::ImageTransport it;
 		image_transport::Subscriber image_sub;
@@ -56,8 +59,10 @@ class EPuckTracking
 			nh("~"),
 			it(nh)
 		{
+			for(int i=0;i<8;i++)for(int j=0;j<2;j++)speed[i][j]=0.0;
 			image_sub = it.subscribe("/camera1/image_rect_color", 1, &EPuckTracking::image_callback, this);
 			cam_info_sub = nh.subscribe("/camera1/camera_info", 1, &EPuckTracking::cam_info_callback, this);
+			vect = nh.subscribe("/consensus/speed",1,&EPuckTracking::vector_callback,this);
 			marker_size = 0.05;
 			image_pub = it.advertise("result", 1);
 			debug_pub = it.advertise("debug", 1);
@@ -144,6 +149,7 @@ class EPuckTracking
 						geometry_msgs::TransformStamped transformMsg;
 						tf::transformStampedTFToMsg(stampedTransform, transformMsg);
 						transform_pub.publish(transformMsg);
+
 						br.sendTransform(stampedTransform);
 						geometry_msgs::Vector3Stamped positionMsg;
 						positionMsg.header = transformMsg.header;
@@ -155,7 +161,7 @@ class EPuckTracking
 				}
 				
 				//for each marker, draw info and its boundaries in the image
-				for(size_t i=0; draw_markers && i < markers.size(); ++i)
+				for(size_t i=0; draw_markers && i < 8; ++i)
 				{
 					markers[i].draw(resultImg,cv::Scalar(0,0,255),2);
 				}
@@ -167,7 +173,7 @@ class EPuckTracking
 					for(size_t i=0; i<markers.size(); ++i)
 					{
 
-						if (draw_markers_cube && markers[i].id<8) CvDrawingUtils::draw3dCube(resultImg, markers[i], camParam);
+						//if (draw_markers_cube && markers[i].id<8) CvDrawingUtils::draw3dCube(resultImg, markers[i], camParam);
 						if (draw_markers_axis==true && markers[i].id<8) CvDrawingUtils::draw3dAxis(resultImg, markers[i], camParam);
 					}
 					//draw board axis
@@ -203,12 +209,66 @@ class EPuckTracking
 			}
 		}
 
+		void vector_callback(const geometry_msgs::TwistStamped::ConstPtr& msg){
+			if(msg->header.frame_id == "0"){
+				speed[0][0]= msg->twist.linear.x;
+				speed[0][1]= msg->twist.linear.y;
+			}
+			if(msg->header.frame_id == "1"){
+							speed[1][0]= msg->twist.linear.x;
+							speed[1][1]= msg->twist.linear.y;
+						}
+			if(msg->header.frame_id == "2"){
+							speed[2][0]= msg->twist.linear.x;
+							speed[2][1]= msg->twist.linear.y;
+						}
+			if(msg->header.frame_id == "3"){
+							speed[3][0]= msg->twist.linear.x;
+							speed[3][1]= msg->twist.linear.y;
+						}
+			if(msg->header.frame_id == "4"){
+							speed[4][0]= msg->twist.linear.x;
+							speed[4][1]= msg->twist.linear.y;
+						}
+			if(msg->header.frame_id == "5"){
+							speed[5][0]= msg->twist.linear.x;
+							speed[5][1]= msg->twist.linear.y;
+						}
+			if(msg->header.frame_id == "6"){
+							speed[6][0]= msg->twist.linear.x;
+							speed[6][1]= msg->twist.linear.y;
+						}
+			if(msg->header.frame_id == "7"){
+							speed[7][0]= msg->twist.linear.x;
+							speed[7][1]= msg->twist.linear.y;
+						}
+
+
+		}
+
 		// wait for one camerainfo, then shut down that subscriber
 		void cam_info_callback(const sensor_msgs::CameraInfo &msg)
 		{
 			camParam = ar_sys::getCamParams(msg, useRectifiedImages);
 			cam_info_received = true;
 			cam_info_sub.shutdown();
+		}
+		void drawSpeed(cv::Mat &Image, Marker &m, const CameraParameters &CP){
+
+			 Mat objectPoints(4, 3, CV_32FC1);
+			    objectPoints.at< float >(0, 0) = 0;
+			    objectPoints.at< float >(0, 1) = 0;
+			    objectPoints.at< float >(0, 2) = 0;
+			    objectPoints.at< float >(1, 0) = speed[m.id][0];
+			    objectPoints.at< float >(1, 1) = speed[m.id][1];
+			    objectPoints.at< float >(1, 2) = 0;
+
+
+			    vector< Point2f > imagePoints;
+			    cv::projectPoints(objectPoints, m.Rvec, m.Tvec, CP.CameraMatrix, CP.Distorsion, imagePoints);
+			    // draw lines of different colours
+			    cv::line(Image, imagePoints[0], imagePoints[1], Scalar(0, 0, 255, 255), 1, CV_AA);
+
 		}
 };
 

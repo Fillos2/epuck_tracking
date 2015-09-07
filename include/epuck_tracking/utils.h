@@ -24,6 +24,6 @@ namespace ar_sys
      * @return tf::Transform
      */
   tf::Transform getTf(const cv::Mat &Rvec, const cv::Mat &Tvec);
-
+  tf::Transform getTfMarkers(const cv::Mat &Rvec, const cv::Mat &Tvec);
 }
 #endif // UTILS_H
