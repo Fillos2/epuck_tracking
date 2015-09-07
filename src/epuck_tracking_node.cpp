@@ -155,12 +155,12 @@ class EPuckTracking
 				}
 				
 				//for each marker, draw info and its boundaries in the image
-				/*for(size_t i=0; draw_markers && i < markers.size(); ++i)
+				for(size_t i=0; draw_markers && i < markers.size(); ++i)
 				{
 					markers[i].draw(resultImg,cv::Scalar(0,0,255),2);
 				}
 
-*/
+
 				if(camParam.isValid() && marker_size != -1)
 				{
 					//draw a 3d cube in each marker if there is 3d info
@@ -168,7 +168,7 @@ class EPuckTracking
 					{
 
 						if (draw_markers_cube && markers[i].id<8) CvDrawingUtils::draw3dCube(resultImg, markers[i], camParam);
-						if (draw_markers_axis=true && markers[i].id<8) CvDrawingUtils::draw3dAxis(resultImg, markers[i], camParam);
+						if (draw_markers_axis==true && markers[i].id<8) CvDrawingUtils::draw3dAxis(resultImg, markers[i], camParam);
 					}
 					//draw board axis
 					//if (probDetect > 0.0) CvDrawingUtils::draw3dAxis(resultImg, the_board_detected, camParam);
