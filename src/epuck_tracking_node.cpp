@@ -126,7 +126,7 @@ class EPuckTracking
 			    	CvDrawingUtils::draw3dAxis(resultImg, TheBoardDetected, camParam);
                	}
            			
-				tf::Transform boardtf = ar_sys::getTf(TheBoardDetected.Rvec,TheBoardDetected.Tvec);
+				tf::Transform boardtf = ar_sys::getTfMarkers(TheBoardDetected.Rvec,TheBoardDetected.Tvec);
 				tf::StampedTransform stampedTransform(boardtf, msg->header.stamp, "world", "board");
 				br.sendTransform(stampedTransform);
 				//ROS_INFO_STREAM(markers.size());
@@ -134,11 +134,16 @@ class EPuckTracking
 				{
 					if(markers[marker_index].id<8){	
 					
-						tf::Transform transform = ar_sys::getTf(markers[marker_index].Rvec, markers[marker_index].Tvec);
+						tf::Transform transform = ar_sys::getTfMarkers(markers[marker_index].Rvec, markers[marker_index].Tvec);
 						
 						tf::StampedTransform stampedTransform(transform, msg->header.stamp, "world", boost::to_string(markers[marker_index].id));
-
 						br.sendTransform(stampedTransform);
+						tf::Transform lineariz;
+						lineariz.setOrigin( tf::Vector3(0.35, 0.0, 0.0) );
+						lineariz.setRotation( tf::Quaternion(0, 0, 0, 1) );
+						br.sendTransform(tf::StampedTransform(lineariz, ros::Time::now(), boost::to_string(markers[marker_index].id), "linear"));
+
+
 
 					}
 					
@@ -160,7 +165,7 @@ class EPuckTracking
 
 						//if (draw_markers_cube && markers[i].id<8) CvDrawingUtils::draw3dCube(resultImg, markers[i], camParam);
 						if (draw_markers_axis==true && markers[i].id<8) CvDrawingUtils::draw3dAxis(resultImg, markers[i], camParam);
-						drawSpeed(resultImg, markers[i], camParam);
+					//	drawSpeed(resultImg, markers[i], camParam);
 					}
 					//draw board axis
 					//if (probDetect > 0.0) CvDrawingUtils::draw3dAxis(resultImg, the_board_detected, camParam);
