@@ -38,9 +38,7 @@ class EPuckTracking
 		bool cam_info_received;
 		image_transport::Publisher image_pub;
 		image_transport::Publisher debug_pub;
-		ros::Publisher pose_pub;
-		ros::Publisher transform_pub; 
-		ros::Publisher position_pub;
+
 		ros::Subscriber vect;
 		std::string board_frame;
 		Dictionary D;
@@ -60,15 +58,15 @@ class EPuckTracking
 			it(nh)
 		{
 			for(int i=0;i<8;i++)for(int j=0;j<2;j++)speed[i][j]=0.0;
+
 			image_sub = it.subscribe("/camera1/image_rect_color", 1, &EPuckTracking::image_callback, this);
 			cam_info_sub = nh.subscribe("/camera1/camera_info", 1, &EPuckTracking::cam_info_callback, this);
 			vect = nh.subscribe("/consensus/speed",1,&EPuckTracking::vector_callback,this);
+
 			marker_size = 0.05;
 			image_pub = it.advertise("result", 1);
 			debug_pub = it.advertise("debug", 1);
-			pose_pub = nh.advertise<geometry_msgs::PoseStamped>("pose", 100);
-			transform_pub = nh.advertise<geometry_msgs::TransformStamped>("transform", 100);
-			position_pub = nh.advertise<geometry_msgs::Vector3Stamped>("position", 100);
+
             if (D.fromFile("/home/filippo/catkin_ws/src/epuck_tracking/data/dizionario.yml") == false)
 				ROS_ERROR_STREAM("impossibile aprire dizionario");
 			ROS_INFO_STREAM("dictsize "<<D.size());
@@ -140,30 +138,17 @@ class EPuckTracking
 						
 						tf::StampedTransform stampedTransform(transform, msg->header.stamp, "world", boost::to_string(markers[marker_index].id));
 
-						geometry_msgs::PoseStamped poseMsg;
-						tf::poseTFToMsg(transform, poseMsg.pose);
-						poseMsg.header.frame_id = msg->header.frame_id;
-						poseMsg.header.stamp = msg->header.stamp;
-						pose_pub.publish(poseMsg);
-
-						geometry_msgs::TransformStamped transformMsg;
-						tf::transformStampedTFToMsg(stampedTransform, transformMsg);
-						transform_pub.publish(transformMsg);
-
 						br.sendTransform(stampedTransform);
-						geometry_msgs::Vector3Stamped positionMsg;
-						positionMsg.header = transformMsg.header;
-						positionMsg.vector = transformMsg.transform.translation;
-						position_pub.publish(positionMsg);
 
-						}
+					}
 					
 				}
 				
 				//for each marker, draw info and its boundaries in the image
-				for(size_t i=0; draw_markers && i < 8; ++i)
+				for(size_t i=0; draw_markers && markers[i].id < 8; ++i)
 				{
 					markers[i].draw(resultImg,cv::Scalar(0,0,255),2);
+
 				}
 
 
@@ -175,6 +160,7 @@ class EPuckTracking
 
 						//if (draw_markers_cube && markers[i].id<8) CvDrawingUtils::draw3dCube(resultImg, markers[i], camParam);
 						if (draw_markers_axis==true && markers[i].id<8) CvDrawingUtils::draw3dAxis(resultImg, markers[i], camParam);
+						drawSpeed(resultImg, markers[i], camParam);
 					}
 					//draw board axis
 					//if (probDetect > 0.0) CvDrawingUtils::draw3dAxis(resultImg, the_board_detected, camParam);
