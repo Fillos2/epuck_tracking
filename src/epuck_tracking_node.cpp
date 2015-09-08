@@ -124,9 +124,9 @@ class EPuckTracking
 				float probDetect = 0.;
 				probDetect=TheBoardDetector.detect(markers, TheBoardConfig,TheBoardDetected, camParam, marker_size);
 				
-			              if (probDetect > 0.2) {
-                   			 CvDrawingUtils::draw3dAxis(resultImg, TheBoardDetected, camParam);
-               			      }
+			    if (probDetect > 0.2) {
+			    	CvDrawingUtils::draw3dAxis(resultImg, TheBoardDetected, camParam);
+               	}
            			
 				tf::Transform boardtf = ar_sys::getTf(TheBoardDetected.Rvec,TheBoardDetected.Tvec);
 				tf::StampedTransform stampedTransform(boardtf, msg->header.stamp, "world", "board");
