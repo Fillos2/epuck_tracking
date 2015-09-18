@@ -107,7 +107,7 @@ tf::Transform ar_sys::getTfMarkers(const cv::Mat &Rvec, const cv::Mat &Tvec)
 		rot.at<float>(1,0), rot.at<float>(1,1), rot.at<float>(1,2),
 		rot.at<float>(2,0), rot.at<float>(2,1), rot.at<float>(2,2));
 
-	tf::Vector3 tf_orig(Tvec.at<float>(0,0), Tvec.at<float>(1,0), Tvec.at<float>(2,0));
+	tf::Vector3 tf_orig(Tvec.at<float>(0,0),0.75* Tvec.at<float>(1,0), Tvec.at<float>(2,0));
 
 	return tf::Transform(tf_rot, tf_orig);
 }

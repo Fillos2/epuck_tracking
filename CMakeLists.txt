@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   cv_bridge
   visualization_msgs
+  message_generation
 )
 find_package(aruco REQUIRED)
 
@@ -49,11 +50,11 @@ find_package(aruco REQUIRED)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
+ add_message_files(
+   FILES
+   bots.msg
 #   Message2.msg
-# )
+ )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -70,10 +71,10 @@ find_package(aruco REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   geometry_msgs#   std_msgs#   visualization_msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs#   visualization_msgs
+ )
 
 ###################################
 ## catkin specific configuration ##
@@ -89,6 +90,7 @@ catkin_package(
 #  LIBRARIES epuck_tracking
 #  CATKIN_DEPENDS geometry_msgs image_transport roscpp std_msgs tf vision_opencv visualization_msgs
 #  DEPENDS system_lib
+   CATKIN_DEPENDS message_runtime
 )
 #set(aruco_LIBS /home/filippo/Documenti/aruco_test/aruco-1.3.0/build/src/libaruco.so.1.3.0)
 
@@ -123,50 +125,4 @@ include_directories(
    
 )
 
-#############
-## Install ##
-#############
 
-# all install targets should use catkin DESTINATION variables
-# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
-
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
-## Mark executables and/or libraries for installation
-# install(TARGETS epuck_tracking epuck_tracking_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
-## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
-
-#############
-## Testing ##
-#############
-
-## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_epuck_tracking.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
-
-## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)
